@@ -7,6 +7,9 @@ import com.app.product.entity.Product;
 import com.app.product.exception.ProductAlreadyExistsException;
 import com.app.product.exception.ProductNotFoundException;
 import com.app.product.repository.ProductRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +44,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "products", key = "#id")
     public ProductResponseDTO getProductById(Long id) {
         simulateSlowDbCall();
         Product product = productRepository.findById(id)
@@ -50,6 +54,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "products", key = "'all'")
     public List<ProductResponseDTO> getAllProducts() {
         simulateSlowDbCall();
         return productRepository.findAll().stream()
@@ -57,6 +62,7 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    @CachePut(value = "products", key = "#id")
     public ProductResponseDTO updateProduct(Long id, UpdateProductDTO dto) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(
@@ -91,6 +97,7 @@ public class ProductService {
         return mapToResponseDTO(updatedProduct);
     }
 
+    @CacheEvict(value = "products", key = "#id")
     public void deleteProduct(Long id) {
         if (!productRepository.existsById(id)) {
             throw new ProductNotFoundException(
