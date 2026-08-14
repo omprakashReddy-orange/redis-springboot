@@ -15,6 +15,20 @@ services:
     ports:
       - "3000:3000"
 
+  mysql:
+    image: mysql:8.0
+    container_name: product_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: integrator
+      MYSQL_DATABASE: product_db
+      MYSQL_USER: product_user
+      MYSQL_PASSWORD: product_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - product_network
 
 
   redis:
@@ -36,6 +50,7 @@ services:
 
 volumes:
   redis_data:
+  mysql_data:
 
 networks:
   product_network:
